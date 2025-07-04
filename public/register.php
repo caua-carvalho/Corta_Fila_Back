@@ -59,7 +59,15 @@ try {
         ':hash'   => $hash,
     ]);
 
-    echo json_encode(['success' => true]);
+    // 3) Pega o ID do usuário inserido
+    $userId = $pdo->lastInsertId();
+
+    $token = generateToken($userId);
+
+    echo json_encode([
+        'success' => true,
+        'token'   => $token,
+    ]);
 
 } catch (Throwable $e) {
     // 6) Em caso de qualquer erro, mostra a mensagem
