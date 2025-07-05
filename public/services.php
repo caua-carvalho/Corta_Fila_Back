@@ -13,5 +13,12 @@ $stmt = $pdo->prepare('SELECT service_id, service_name, price, duration_mins FRO
 $stmt->execute([$barberId]);
 $services = $stmt->fetchAll();
 
-echo json_encode($services);
-?>
+echo json_encode([
+    [
+    'service_id' => 1,
+    'service_name' => 'Corte de Cabelo',
+    'price' => 35.00,
+    'duration_mins' => 30
+    ]
+]);
+
