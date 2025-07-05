@@ -12,7 +12,7 @@ $userId = requireAuth();
 // Busca dados básicos do usuário
 global $pdo;
 $stmt = $pdo->prepare("
-    SELECT user_id, role_id, name, phone, email, is_active
+    SELECT user_id, role_id, name, phone, is_active
       FROM users
      WHERE user_id = :id
 ");

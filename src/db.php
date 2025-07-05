@@ -1,7 +1,16 @@
 <?php
-// src/db.php
+// Em validate.php, login.php e todos os endpoints públicos
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Ajuste só para localhost do React em dev
+    header('Access-Control-Allow-Origin: http://localhost:3000');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    http_response_code(200);
+    exit; // encerra o preflight com OK
+}
+
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 require __DIR__ . '/../config/config.php';
