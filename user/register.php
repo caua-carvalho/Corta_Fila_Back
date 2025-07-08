@@ -4,8 +4,8 @@
 
 require_once '../db.php'; // Certifique-se que esse arquivo existe e conecta ao banco
 
-// Função de alto nível para registrar barbeiro
-function registrarBarbeiro(string $name, string $phone, string $password_hash): bool {
+// Função de alto nível para registrar User
+function registrarUser(string $name, string $phone, string $password_hash): bool {
     // Valida os dados recebidos
     if (!validarDados($name, $phone, $password_hash)) {
         http_response_code(400);
@@ -20,15 +20,15 @@ function registrarBarbeiro(string $name, string $phone, string $password_hash): 
         return false;
     }
 
-    // Tenta inserir o barbeiro no banco
-    if (!inserirBarbeiro($name, $phone, $password_hash)) {
+    // Tenta inserir o User no banco
+    if (!inserirUser($name, $phone, $password_hash)) {
         http_response_code(500);
-        echo json_encode(['erro' => 'Erro ao cadastrar barbeiro']);
+        echo json_encode(['erro' => 'Erro ao cadastrar User']);
         return false;
     }
 
     http_response_code(201);
-    echo json_encode(['mensagem' => 'Barbeiro cadastrado com sucesso']);
+    echo json_encode(['mensagem' => 'User cadastrado com sucesso']);
     return true;
 }
 
@@ -55,7 +55,7 @@ function phoneJaCadastrado(string $phone): bool {
 }
 
 // Insere o usuario no banco
-function inserirBarbeiro(string $name, string $phone, string $password_hash): bool {
+function inserirUser(string $name, string $phone, string $password_hash): bool {
     global $pdo;
     $password_hash = password_hash($password_hash, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare('INSERT INTO users (name, phone, password_hash) VALUES (:name, :phone, :password_hash)');
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $dados['name'] ?? '';
     $phone = $dados['phone'] ?? '';
     $password_hash = $dados['password'] ?? '';
-    registrarBarbeiro($name, $phone, $password_hash);
+    registrarUser($name, $phone, $password_hash);
 } else {
     http_response_code(405);
     echo json_encode(['erro' => 'Método não permitido']);
