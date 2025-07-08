@@ -34,6 +34,23 @@ function createBarberDirectory(string $user_id): void {
     }
 }
 
+function uploadBarberLogo(string $user_id, string $photo): string {
+    $target_dir = __DIR__ . '/barberShops/' . $user_id . '/';
+    $target_file = $target_dir . basename($photo);
+    
+    // Verifica se o diretório existe, caso contrário cria
+    if (!is_dir($target_dir)) {
+        createBarberDirectory($user_id);
+    }
+
+    // Move o arquivo para o diretório do barbeiro
+    if (move_uploaded_file($_FILES['photo']['tmp_name'], $target_file)) {
+        return $target_file; // Retorna o caminho do arquivo
+    } else {
+        throw new Exception('Erro ao fazer upload da foto do barbeiro');
+    }
+}
+
 
 // Insere um novo barbeiro no banco
 function insertBarber(string $name, string $email, string $bio, string $photo, string $user_id): bool {
