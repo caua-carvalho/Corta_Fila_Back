@@ -14,6 +14,27 @@ function emailJaCadastrado(string $email): bool {
     }
 }
 
+/**
+ * Cria o diretório para armazenar as infos de um barbeiro específico.
+ *
+ * Este diretório será criado em: /barberShops/{user_id}
+ * Caso o diretório já exista, nada será feito.
+ * Caso ocorra um erro ao criar o diretório, uma exceção será lançada e um erro será registrado no log.
+ *
+ * @param string $user_id O identificador único do barbeiro.
+ * @throws Exception Se não for possível criar o diretório.
+ */
+function createBarberDirectory(string $user_id): void {
+    $dir = __DIR__ . '/barberShops/' . $user_id;
+    if (!is_dir($dir)) {
+        if (!mkdir($dir, 0755, true)) {
+            error_log('Erro ao criar diretório para barbeiro: ' . $dir);
+            throw new Exception('Erro ao criar diretório para barbeiro');
+        }
+    }
+}
+
+
 // Insere um novo barbeiro no banco
 function insertBarber(string $name, string $email, string $bio, string $photo, string $user_id): bool {
     global $pdo;
