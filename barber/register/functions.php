@@ -1,10 +1,7 @@
 <?php
 require_once '../../db.php';
 
-/**
- * Verifica se o email já está cadastrado no banco.
- * Gerado pelo Copilot
- */
+// Verifica se o email já está cadastrado no banco
 function emailJaCadastrado(string $email): bool {
     global $pdo;
     try {
@@ -17,10 +14,7 @@ function emailJaCadastrado(string $email): bool {
     }
 }
 
-/**
- * Insere um novo barbeiro no banco.
- * Gerado pelo Copilot
- */
+// Insere um novo barbeiro no banco
 function insertBarber(string $name, string $email, string $bio, string $photo, string $user_id): bool {
     global $pdo;
     try {
@@ -41,10 +35,7 @@ function insertBarber(string $name, string $email, string $bio, string $photo, s
     }
 }
 
-/**
- * Faz o registro do barbeiro, validando dados e tratando erros.
- * Gerado pelo Copilot
- */
+// Faz o registro do barbeiro, validando dados e tratando erros
 function registerBarber(string $name, string $email, string $bio, string $photo, string $user_id): bool {
     if (empty($name) || empty($email) || empty($bio) || empty($photo) || empty($user_id)) {
         http_response_code(400);
