@@ -42,7 +42,7 @@ try {
 
     // 5) Sucesso
     http_response_code(201);
-    echo json_encode(['mensagem'=>'Barbeiro cadastrado com sucesso','photo_url'=>$photoUrl]);
+    echo json_encode(['success'=>'Barbeiro cadastrado com sucesso','photo_url'=>$photoUrl]);
 
 } catch (Exception $e) {
     error_log($e->getMessage());
