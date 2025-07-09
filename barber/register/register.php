@@ -42,7 +42,18 @@ try {
 
     // 5) Sucesso
     http_response_code(201);
-    echo json_encode(['success'=>'Barbeiro cadastrado com sucesso','photo_url'=>$photoUrl]);
+    
+    // Retorna as informações do barbeiro cadastrado como 'user'
+    echo json_encode([
+        'success' => 'Barbeiro cadastrado com sucesso',
+        'user' => [
+            'name' => $_POST['name'],
+            'email' => $_POST['email'],
+            'bio' => $_POST['bio'],
+            'photo_url' => $photoUrl,
+            'user_id' => $_POST['user_id']
+        ]
+    ]);
 
 } catch (Exception $e) {
     error_log($e->getMessage());
