@@ -15,6 +15,7 @@ Este repositório contém o backend em PHP da aplicação **Corta Fila**.
    ```
 
 3. Ajuste `db.php` para ler essas variáveis ou edite o arquivo com os valores desejados.
+4. Defina a variável de ambiente `JWT_SECRET` com a chave utilizada para assinar os tokens JWT.
 
 ## Endpoints
 
@@ -30,12 +31,17 @@ curl -X POST http://localhost:8000/user/register.php \
 ```
 
 ### POST `/user/login.php`
-Realiza o login de um usuário.
+Realiza o login de um usuário e retorna um token JWT.
 
 ```bash
 curl -X POST http://localhost:8000/user/login.php \
      -H 'Content-Type: application/json' \
      -d '{"phone":"+551199999999","password":"123456"}'
+```
+O retorno será um JSON contendo:
+
+```json
+{"token": "<jwt>"}
 ```
 
 ### POST `/barber/register/register.php`
@@ -43,11 +49,20 @@ Cadastro de barbeiro (envio de foto via `multipart/form-data`).
 
 ```bash
 curl -X POST http://localhost:8000/barber/register/register.php \
+     -H 'Authorization: Bearer <jwt>' \
      -F 'name=Barbeiro' \
      -F 'email=barbeiro@example.com' \
      -F 'bio=Melhor barbeiro' \
      -F 'user_id=1' \
      -F 'photo=@/caminho/para/foto.jpg'
+```
+
+### GET `/barber/auth/infoBarber.php`
+Retorna os dados do barbeiro autenticado (é necessário enviar o token).
+
+```bash
+curl -X GET 'http://localhost:8000/barber/auth/infoBarber.php?user_id=1' \
+     -H 'Authorization: Bearer <jwt>'
 ```
 
 ## Executando o servidor

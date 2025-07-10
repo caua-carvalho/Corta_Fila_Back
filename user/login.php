@@ -1,5 +1,8 @@
 <?php
 require_once '../db.php';
+require_once '../vendor/autoload.php';
+
+use Firebase\JWT\JWT;
 
 // Recebe phone e password, retorna true se autenticado, false se não
 function autenticarUser(string $phone, string $password): bool {
@@ -25,9 +28,16 @@ function autenticarUser(string $phone, string $password): bool {
         return false;
     }
 
-    // Aqui tu pode gerar um token JWT ou sessão, mas vou só retornar sucesso por enquanto
+    // Gera token JWT para o usuário logado
+    $payload = [
+        'user_id' => $user['user_id'],
+        'exp' => time() + 3600
+    ];
+
+    $jwt = JWT::encode($payload, getenv('JWT_SECRET'), 'HS256');
+
     http_response_code(200);
-    echo json_encode(['mensagem' => 'Login realizado com sucesso', 'user' => $user]);
+    echo json_encode(['token' => $jwt]);
     return true;
 }
 

@@ -2,6 +2,7 @@
 // Gerado pelo Copilot
 
 require_once '../../db.php';
+require_once '../../auth/validateToken.php';
 
 /**
  * Retorna informações do barbeiro pelo user_id passado na URL.
