@@ -1,70 +1,58 @@
 <?php
-require_once '../db.php';
-require_once '../vendor/autoload.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../db.php';
 
 use Firebase\JWT\JWT;
 
-// Recebe phone e password, retorna true se autenticado, false se não
-function autenticarUser(string $phone, string $password): bool {
-    // Valida os dados recebidos
-    if (!validarDadosLogin($phone, $password)) {
-        http_response_code(400);
-        echo json_encode(['erro' => 'Dados inválidos']);
-        return false;
-    }
+// Leitura dos dados
+$dados = json_decode(file_get_contents('php://input'), true);
+$phone = trim($dados['phone'] ?? '');
+$pass  = $dados['password'] ?? '';
 
-    // Busca o User pelo phone
-    $user = buscaruserPorPhone($phone);
-    if (!$user) {
-        http_response_code(401);
-        echo json_encode(['erro' => 'Usuário ou senha inválidos']);
-        return false;
-    }
-
-    // Verifica a senha usando password_verify
-    if (!password_verify($password, $user['password_hash'])) {
-        http_response_code(401);
-        echo json_encode(['erro' => 'Usuário ou senha inválidos']);
-        return false;
-    }
-
-    // Gera token JWT para o usuário logado
-    $payload = [
-        'user_id' => $user['user_id'],
-        'exp' => time() + 3600
-    ];
-
-    $jwt = JWT::encode($payload, getenv('JWT_SECRET'), 'HS256');
-
-    http_response_code(200);
-    echo json_encode(['token' => $jwt]);
-    return true;
+// Validação mínima
+if (
+    empty($phone) ||
+    empty($pass) ||
+    !preg_match('/^\+?[0-9]{10,15}$/', $phone) ||
+    strlen($pass) < 6
+) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Telefone ou senha inválidos']);
+    exit;
 }
 
-// Valida phone e password recebidos no login
-function validarDadosLogin(string $phone, string $password): bool {
-    if (empty($phone) || empty($password)) return false;
-    if (!preg_match('/^\+?[0-9]{10,15}$/', $phone)) return false;
-    if (strlen($password) < 6) return false;
-    return true;
-}
-
-// Busca usuário pelo phone no banco
-function buscaruserPorPhone(string $phone): ?array {
-    global $pdo;
-    $stmt = $pdo->prepare('SELECT user_id, name, phone, password_hash, role FROM users WHERE phone = :phone');
+try {
+    // Busca usuário
+    $stmt = $pdo->prepare('SELECT user_id, password_hash, role FROM users WHERE phone = :phone');
     $stmt->execute(['phone' => $phone]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $user ?: null;
-}
 
-// Recebe dados do POST e chama autenticação
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $dados = json_decode(file_get_contents('php://input'), true);
-    $phone = $dados['phone'] ?? '';
-    $password = $dados['password'] ?? '';
-    autenticarUser($phone, $password);
-} else {
-    http_response_code(405);
-    echo json_encode(['erro' => 'Método não permitido']);
+    if (!$user || !password_verify($pass, $user['password_hash'])) {
+        throw new RuntimeException('Credenciais incorretas');
+    }
+
+    // Geração de token
+    $secret = getenv('JWT_SECRET') ?: 'segredo_dev';
+    $token  = JWT::encode(
+        ['user_id' => $user['user_id'], 'exp' => time() + 3600],
+        $secret,
+        'HS256'
+    );
+
+    http_response_code(200);
+    echo json_encode([
+        'token' => $token,
+        'role'  => $user['role'],
+    ]);
+
+} catch (RuntimeException $e) {
+    http_response_code(401);
+    echo json_encode(['error' => $e->getMessage()]);
+
+} catch (Exception $e) {
+    error_log('Erro de autenticação: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro interno']);
 }
