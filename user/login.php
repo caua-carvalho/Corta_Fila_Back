@@ -21,7 +21,7 @@ function autenticarUser(string $phone, string $password): array {
     return [
         
         'status' => 200,
-        'body' => ['mensagem' => 'Login realizado com sucesso', 'user' => $user]
+        'body' => ['mensagem' => 'Login realizado com sucesso', 'user' => $user, 'status' => 'success']
     ];
 }
 
