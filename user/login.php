@@ -1,43 +1,30 @@
 <?php
 require_once '../db.php';
 
-// Recebe phone e password, retorna true se autenticado, false se não
-function autenticarUser(string $phone, string $password): bool {
-    // Valida os dados recebidos
-    if (!validarDadosLogin($phone, $password)) {
-        http_response_code(400);
-        echo json_encode(['erro' => 'Dados inválidos']);
-        return false;
-    }
-
-    // Busca o User pelo phone
+function autenticarUser(string $phone, string $password): array {
     $user = buscaruserPorPhone($phone);
     if (!$user) {
-        http_response_code(401);
-        echo json_encode(['erro' => 'Usuário ou senha inválidos']);
-        return false;
+        return [
+            'status' => 401,
+            'body' => ['erro' => 'Usuário ou senha inválidos']
+        ];
     }
 
-    // Verifica a senha usando password_verify
-    if (!password_verify($password, $user['password_hash'])) {
-        http_response_code(401);
-        echo json_encode(['erro' => 'Usuário ou senha inválidos']);
-        return false;
+    if (!password_verify(password: $password, hash: $user['password_hash'])) {
+        return [
+            'status' => 401,
+            'body' => ['erro' => 'Usuário ou senha inválidos']
+        ];
     }
 
-    // Aqui tu pode gerar um token JWT ou sessão, mas vou só retornar sucesso por enquanto
-    http_response_code(200);
-    echo json_encode(['mensagem' => 'Login realizado com sucesso', 'user' => $user]);
-    return true;
+    // Sucesso na autenticação
+    return [
+        
+        'status' => 200,
+        'body' => ['mensagem' => 'Login realizado com sucesso', 'user' => $user]
+    ];
 }
 
-// Valida phone e password recebidos no login
-function validarDadosLogin(string $phone, string $password): bool {
-    if (empty($phone) || empty($password)) return false;
-    if (!preg_match('/^\+?[0-9]{10,15}$/', $phone)) return false;
-    if (strlen($password) < 6) return false;
-    return true;
-}
 
 // Busca usuário pelo phone no banco
 function buscaruserPorPhone(string $phone): ?array {
@@ -48,13 +35,22 @@ function buscaruserPorPhone(string $phone): ?array {
     return $user ?: null;
 }
 
-// Recebe dados do POST e chama autenticação
+// Controller que recebe dados do POST, valida e retorna resposta
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dados = json_decode(file_get_contents('php://input'), true);
-    $phone = $dados['phone'] ?? '';
-    $password = $dados['password'] ?? '';
-    autenticarUser($phone, $password);
+    $phone = $dados['phone'] ?? null;
+    $password = $dados['password'] ?? null;
+
+    if (empty($phone) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(['erro' => 'Campos obrigatórios não preenchidos']);
+        return;
+    }
+
+    $resultado = autenticarUser($phone, $password);
+    http_response_code($resultado['status']);
+    echo json_encode($resultado['body']);
 } else {
     http_response_code(405);
     echo json_encode(['erro' => 'Método não permitido']);
-}
+}   echo json_encode(['erro' => 'Método não permitido']);
